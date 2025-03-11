@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,7 +10,14 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto) {
-    return await this.userModel.create(createUserDto);
+    try {
+      return await this.userModel.create(createUserDto);
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new ConflictException('Email already in use');
+      }
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
   }
 
   findAll() {
