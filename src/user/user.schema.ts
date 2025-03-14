@@ -24,7 +24,7 @@ export class User {
   })
   password: string;
 
-  @Prop({ required: true, type: String, enum: ['Admin', 'user'] })
+  @Prop({ type: String, enum: ['Admin', 'user'] })
   role: string;
 
   @Prop({ type: String })
@@ -57,9 +57,4 @@ UserSchema.pre<UserDocument>('save', async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
-});
-
-// ✅ Middleware to log after saving
-UserSchema.post<UserDocument>('save', function (doc) {
-  console.log(`User ${doc.email} has been created`);
 });
