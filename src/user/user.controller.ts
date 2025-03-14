@@ -11,6 +11,7 @@ import {
   UseGuards,
   Request,
   Req,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,36 +28,61 @@ import { Roles } from './decorators/roles.decorator';
     forbidNonWhitelisted: true,
   }),
 )
-@UseGuards(AuthGuard, RolesGuard)
+// @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   //@Desc: This method will create a user
-  //@Route: POST /users
+  //@Route: POST /api/v1/users
   //@Access: private ['admin']
   @Post()
   @Roles(['admin'])
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return {
+      status: 200,
+      message: 'user created succuss',
+      data: await this.userService.create(createUserDto),
+    };
   }
 
+  //@Desc: This method will return all the user
+  //@Route: GET /api/v1/users
+  //@Access: private ['admin']
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Roles(['admin'])
+  async findAll(@Query() { limit, page }) {
+    return {
+      status: 200,
+      page: page,
+      data: await this.userService.findAll(limit, page),
+    };
   }
 
+  //@Desc: This method will return user by id
+  //@Route: GET /api/v1/users/:id
+  //@Access: private ['admin']
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return {
+      status: 200,
+      data: await this.userService.findOne(id),
+    };
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return {
+      status: 200,
+      data: await this.userService.update(id, updateUserDto),
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req) {
+    await this.userService.remove(id, req.user);
+    return {
+      status: 200,
+      message: 'user has been delete',
+    };
   }
 }
