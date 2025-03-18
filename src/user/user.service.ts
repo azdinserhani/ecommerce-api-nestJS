@@ -94,4 +94,38 @@ export class UserService {
     }
     return await this.userModel.findByIdAndDelete(id);
   }
+
+  async getUserMe(payload) {
+    return {
+      status: 200,
+      data: await this.userModel
+        .findById(payload._id)
+        .select(['-password', '-__v']),
+    };
+  }
+  async updateUserMe(payload, updatedInfo: UpdateUserDto) {
+    if (updatedInfo.role) {
+      throw new BadRequestException("you can't update your role");
+    }
+    if (updatedInfo.password) {
+      const salt = await bcrypt.genSalt();
+      updatedInfo.password = await bcrypt.hash(updatedInfo.password, salt);
+    }
+    return {
+      status: 200,
+      data: await this.userModel
+        .findByIdAndUpdate(payload._id, updatedInfo, {
+          new: true,
+          runValidators: true,
+        })
+        .select(['-password', '-__v']),
+    };
+  }
+
+  async deleteUserMe(payload) {
+    if (!payload._id) {
+      throw new NotFoundException();
+    }
+    await this.userModel.findByIdAndUpdate(payload._id, { active: false });
+  }
 }

@@ -29,12 +29,12 @@ import { GetUsersQueryDto } from './dto/get-user.dto';
     forbidNonWhitelisted: true,
   }),
 )
-// @UseGuards(AuthGuard, RolesGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
+//=================================================For Admin================================================//
   //@Desc: This method will create a user
-  //@Route: POST /api/v1/users
+  //@Route: POST /api/v1/user
   //@Access: private ['admin']
   @Post()
   @Roles(['admin'])
@@ -47,18 +47,19 @@ export class UserController {
   }
 
   //@Desc: This method will return all the user
-  //@Route: GET /api/v1/users
+  //@Route: GET /api/v1/user
   //@Access: private ['admin']
   @Get()
-  // @Roles(['admin'])
+  @Roles(['admin'])
   async findAll(@Query() query: GetUsersQueryDto) {
     return await this.userService.findAll(query);
   }
 
   //@Desc: This method will return user by id
-  //@Route: GET /api/v1/users/:id
+  //@Route: GET /api/v1/user/:id
   //@Access: private ['admin']
   @Get(':id')
+  @Roles(['admin'])
   async findOne(@Param('id') id: string) {
     return {
       status: 200,
@@ -66,20 +67,68 @@ export class UserController {
     };
   }
 
+  //@Desc: This method will update user by id
+  //@Route: PATCH /api/v1/user/:id
+  //@Access: private ['admin']
   @Patch(':id')
+  @Roles(['admin'])
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return {
       status: 200,
       data: await this.userService.update(id, updateUserDto),
     };
   }
-
+  //@Desc: This method will delete user by id
+  //@Route: DELETE /api/v1/user/:id
+  //@Access: private ['admin']
   @Delete(':id')
+  @Roles(['admin'])
   async remove(@Param('id') id: string, @Req() req) {
     await this.userService.remove(id, req.user);
     return {
       status: 200,
       message: 'user has been delete',
     };
+  }
+}
+
+
+@Controller('userMe')
+@UsePipes(
+  new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }),
+)
+@UseGuards(AuthGuard, RolesGuard)
+export class UserMeController {
+  constructor(private readonly userService: UserService) {}
+
+  //=================================================For users================================================//
+  //@Desc: This method will let user return his information
+  //@Route: GET /api/v1/user/me
+  //@Access: private ['user']
+  @Get('')
+  @Roles(['user'])
+  getUserMe(@Req() req) {
+    return this.userService.getUserMe(req.user);
+  }
+
+  //@Desc: This method will let user return his information
+  //@Route: GET /api/v1/user/me
+  //@Access: private ['user']
+  @Patch('')
+  @Roles(['user'])
+  updateUserMe(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUserMe(req.user, updateUserDto);
+  }
+
+  //@Desc: This method will let user return his information
+  //@Route: GET /api/v1/user/me
+  //@Access: private ['user']
+  @Delete('')
+  @Roles(['user'])
+  deleteUserMe(@Req() req) {
+    return this.userService.deleteUserMe(req.user);
   }
 }
