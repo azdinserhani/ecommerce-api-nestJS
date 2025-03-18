@@ -12,6 +12,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
 import { isValidObjectId, Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { GetUsersQueryDto } from './dto/get-user.dto';
 
 @Injectable()
 export class UserService {
@@ -30,13 +31,24 @@ export class UserService {
       throw new InternalServerErrorException('An unexpected error occurred');
     }
   }
-
-  async findAll(limit = 8, page = 1) {
-    return await this.userModel
-      .find()
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .select(['-password', '-__v']);
+  async findAll(query: GetUsersQueryDto) {
+    const { offset, limit, email, name } = query;
+    const filter: any = {};
+    if (name) {
+      filter.name = new RegExp(name.trim(), 'i');
+    }
+    if (email) {
+      filter.email = new RegExp(email.trim(), 'i');
+    }
+    const users = await this.userModel
+      .find(filter)
+      .skip(offset ?? 0)
+      .limit(limit ?? 100);
+    return {
+      status: 200,
+      length: users.length,
+      data: users,
+    };
   }
 
   async findOne(id: string) {

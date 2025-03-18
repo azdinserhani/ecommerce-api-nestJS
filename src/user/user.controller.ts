@@ -17,9 +17,10 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from './guard/auth.guard';
-import { request } from 'express';
+import { query, request } from 'express';
 import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
+import { GetUsersQueryDto } from './dto/get-user.dto';
 
 @Controller('user')
 @UsePipes(
@@ -49,13 +50,9 @@ export class UserController {
   //@Route: GET /api/v1/users
   //@Access: private ['admin']
   @Get()
-  @Roles(['admin'])
-  async findAll(@Query() { limit, page }) {
-    return {
-      status: 200,
-      page: page,
-      data: await this.userService.findAll(limit, page),
-    };
+  // @Roles(['admin'])
+  async findAll(@Query() query: GetUsersQueryDto) {
+    return await this.userService.findAll(query);
   }
 
   //@Desc: This method will return user by id
