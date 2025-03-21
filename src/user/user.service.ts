@@ -96,6 +96,9 @@ export class UserService {
   }
 
   async getUserMe(payload) {
+    if (!payload._id) {
+      throw new NotFoundException();
+    }
     return {
       status: 200,
       data: await this.userModel

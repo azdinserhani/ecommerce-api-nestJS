@@ -22,6 +22,7 @@ import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { GetUsersQueryDto } from './dto/get-user.dto';
 
+//=================================================For admins================================================//
 @Controller('user')
 @UsePipes(
   new ValidationPipe({
@@ -32,7 +33,7 @@ import { GetUsersQueryDto } from './dto/get-user.dto';
 @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-//=================================================For Admin================================================//
+  //=================================================For Admin================================================//
   //@Desc: This method will create a user
   //@Route: POST /api/v1/user
   //@Access: private ['admin']
@@ -92,7 +93,7 @@ export class UserController {
   }
 }
 
-
+//=================================================For users================================================//
 @Controller('userMe')
 @UsePipes(
   new ValidationPipe({
@@ -104,7 +105,6 @@ export class UserController {
 export class UserMeController {
   constructor(private readonly userService: UserService) {}
 
-  //=================================================For users================================================//
   //@Desc: This method will let user return his information
   //@Route: GET /api/v1/user/me
   //@Access: private ['user']
