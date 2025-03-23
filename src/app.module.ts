@@ -6,6 +6,8 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CategoryModule } from './category/category.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -16,18 +18,19 @@ import { MailerModule } from '@nestjs-modules/mailer';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '1d' },
     }),
     AuthModule,
     MailerModule.forRoot({
       transport: {
-        service:"gmail",
+        service: 'gmail',
         auth: {
           user: process.env.EMAIL_USERNAME,
           pass: process.env.EMAIL_PASSWORD,
         },
       },
     }),
+    CategoryModule,
   ],
   controllers: [],
 })

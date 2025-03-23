@@ -134,8 +134,10 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    findUser.password = hashedPassword;
-    await findUser.save();
+    await this.userModel.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+    );
 
     return {
       status: 200,
