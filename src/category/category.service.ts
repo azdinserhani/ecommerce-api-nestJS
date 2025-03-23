@@ -42,10 +42,11 @@ export class CategoryService {
   }
 
   async findAll() {
-    const categories = await this.categoryModel.find();
+    const categories = await this.categoryModel.find().select('-__v');
     return {
       status: 200,
       length: categories.length,
+      isEmpty: categories.length > 0 ? 'false' : 'true',
       data: categories,
     };
   }

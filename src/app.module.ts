@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CategoryModule } from './category/category.module';
+import { SubCategoryModule } from './sub-category/subCategory.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,6 +33,7 @@ import { CategoryModule } from './category/category.module';
       },
     }),
     CategoryModule,
+    SubCategoryModule,
   ],
   controllers: [],
 })
