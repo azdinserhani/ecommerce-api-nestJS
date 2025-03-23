@@ -10,7 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignInDto, SignUpDto } from './dto/auth.dto';
+import { ResetPasswordDto, SignInDto, SignUpDto } from './dto/auth.dto';
 @UsePipes(
   new ValidationPipe({
     whitelist: true,
@@ -30,10 +30,34 @@ export class AuthController {
   }
 
   //@Desc: This method will allow user signup
-  //@Route: post /api/v1/auth/signup
+  //@Route: POST /api/v1/auth/signup
   //@Access: public
   @Post('/signin')
   signin(@Body() signInDto: SignInDto) {
     return this.authService.signin(signInDto);
+  }
+
+  //@Desc: any user can reset password
+  //@Route: POST /api/v1/auth/reset-password
+  //@Access: public
+  @Post('/reset-password')
+  resetPassword(@Body() email: ResetPasswordDto) {
+    return this.authService.resetPassword(email);
+  }
+
+  //@Desc: any user can verify code
+  //@Route: POST /api/v1/auth/verify-code
+  //@Access: public
+  @Post('/verify-code')
+  verifyCode(@Body() verifyCode: { email: ResetPasswordDto; code: string }) {
+    return this.authService.verifyCode(verifyCode);
+  }
+
+  //@Desc: any user can change password
+  //@Route: POST /api/v1/auth/change-password
+  //@Access: public
+  @Post('/change-password')
+  changePassword(@Body() { email, password }: SignInDto) {
+    return this.authService.changePassword({ email, password });
   }
 }
