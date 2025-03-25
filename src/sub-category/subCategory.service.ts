@@ -9,13 +9,15 @@ import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { SubCategory } from './subCategory.schema';
 import { CreateSubCategoryDto } from './dto/create-subCategory.dto';
-import { UpdateCategoryDto } from 'src/category/dto/update-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-subCategory.dto';
+import { CategoryModule } from 'src/category/category.module';
+import { Category } from 'src/category/category.schema';
 
 @Injectable()
 export class SubCategoryService {
   constructor(
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
+    @InjectModel(Category.name) private categoryModel: Model<Category>,
   ) {}
 
   private async validateSubCategoryId(id: string) {
@@ -28,6 +30,12 @@ export class SubCategoryService {
     }
   }
   async create(createSubCategoryDto: CreateSubCategoryDto) {
+    const category = await this.categoryModel.findById(
+      createSubCategoryDto.category,
+    );
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
     try {
       const createdSubCategory = await (
         await this.subCategoryModel.create(createSubCategoryDto)
