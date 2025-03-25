@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
@@ -14,7 +16,7 @@ import { UpdateBrandDto } from './dto/update-brand.dto';
 import { RolesGuard } from 'src/user/guard/roles.guard';
 import { AuthGuard } from 'src/user/guard/auth.guard';
 import { Roles } from 'src/user/decorators/roles.decorator';
-
+@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('brand')
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
