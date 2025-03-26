@@ -71,8 +71,20 @@ export class RequestProductService {
     };
   }
 
-  async update(id: string, updateRequestProductDto: UpdateRequestProductDto) {
+  async update(
+    id: string,
+    updateRequestProductDto: UpdateRequestProductDto,
+    userId: string,
+  ) {
     await this.validateReqProductId(id);
+    const requestProduct = await this.reqProductModel
+      .findById(id)
+      .select('-__v');
+    if (requestProduct?.user.toString() !== userId) {
+      throw new BadRequestException(
+        'You are not authorized to access this resource',
+      );
+    }
     const updatedRequestProduct = await this.reqProductModel.findByIdAndUpdate(
       id,
       updateRequestProductDto,
@@ -85,8 +97,16 @@ export class RequestProductService {
     };
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     await this.validateReqProductId(id);
+    const requestProduct = await this.reqProductModel
+      .findById(id)
+      .select('-__v');
+    if (requestProduct?.user.toString() !== userId) {
+      throw new BadRequestException(
+        'You are not authorized to access this resource',
+      );
+    }
     const deletedRequestProduct =
       await this.reqProductModel.findByIdAndDelete(id);
     return {
