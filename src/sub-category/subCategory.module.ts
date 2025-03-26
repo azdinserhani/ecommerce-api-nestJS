@@ -9,10 +9,8 @@ import { Category, CategorySchema } from 'src/category/category.schema';
   imports: [
     MongooseModule.forFeature([
       { name: SubCategory.name, schema: subCategorySchema },
+      { name: Category.name, schema: CategorySchema },
     ]),
-     MongooseModule.forFeature([
-          { name: Category.name, schema: CategorySchema },
-        ]),
   ],
   controllers: [subCategoryController],
   providers: [SubCategoryService],
