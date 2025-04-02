@@ -2,15 +2,17 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.schema';
-import { Model } from 'mongoose';
+import mongoose, { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from 'src/category/category.schema';
 import { SubCategory } from 'src/sub-category/subCategory.schema';
 import { Brand } from 'src/brand/brand.schema';
+import { GetProductsQueryDto } from 'src/product/dto/getProduct.dto';
 
 @Injectable()
 export class ProductService {
@@ -74,19 +76,89 @@ export class ProductService {
     }
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll(query: GetProductsQueryDto) {
+    const { offset = 0, limit = 10, priceGte, priceLte, title } = query;
+    const filter: any = {};
+
+    // Filter by price range
+    if (priceGte !== undefined || priceLte !== undefined) {
+      filter.price = {};
+      if (priceGte !== undefined) {
+        filter.price.$gte = priceGte;
+      }
+      if (priceLte !== undefined) {
+        filter.price.$lte = priceLte;
+      }
+    }
+
+    // Filter by title
+    if (title) {
+      filter.title = new RegExp(title.trim(), 'i');
+    }
+
+    const total = await this.productModel.countDocuments(filter); // Total count for pagination
+    const products = await this.productModel
+      .find(filter)
+      .skip(offset)
+      .limit(limit)
+      .select(['-__v']);
+
+    return {
+      status: 200,
+      total,
+      length: products.length,
+      page: Math.floor(offset / limit) + 1,
+      data: products,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid id');
+    }
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException();
+    }
+    return {
+      status: 200,
+      message: 'product found succuss',
+      data: product,
+    };
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid id');
+    }
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException();
+    }
+    const updatedProduct = await this.productModel.findByIdAndUpdate(
+      id,
+      updateProductDto,
+      { new: true },
+    );
+    return {
+      status: 200,
+      message: 'product has been updated',
+      data: updatedProduct,
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid id');
+    }
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException();
+    }
+    await this.productModel.findByIdAndDelete(id);
+    return {
+      status: 200,
+      message: 'product has been deleted',
+    };
   }
 }
